@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}統計資料{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header bg-info text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>訂餐統計
+                    </h2>
+                    <a href="{{ url_for('main.export_statistics', form_id=form_id) }}" 
+                       class="btn btn-light">
+                        <i class="fas fa-file-csv me-2"></i>匯出 CSV
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if not stats %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>目前還沒有訂餐記錄
+                </div>
+                {% else %}
+                <div class="row">
+                    {% for stat in stats %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-info fade-in">
+                            <div class="card-header bg-info text-white">
+                                <h4 class="card-title mb-0">{{ stat['food']['name'] }}</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- 總數量 -->
+                                    <div class="col-6 mb-3">
+                                        <div class="text-center">
+                                            <h5 class="text-muted">總數量</h5>
+                                            <div class="stat-number display-4">{{ stat['total_quantity'] }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 訂購人數 -->
+                                    <div class="col-6 mb-3">
+                                        <div class="text-center">
+                                            <h5 class="text-muted">訂購人數</h5>
+                                            <div class="stat-number display-4">{{ stat['user_count'] }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 總金額 -->
+                                    <div class="col-12 mb-3">
+                                        <div class="text-center">
+                                            <h5 class="text-muted">總金額</h5>
+                                            <div class="stat-number text-success">
+                                                ${{ "%.0f"|format(stat['total_quantity'] * stat['food']['price']) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 訂購者列表 -->
+                                <div class="mt-3">
+                                    <h5 class="text-muted mb-2">訂購者</h5>
+                                    <div class="user-list">
+                                        {% for user in stat['users'] %}
+                                        <span class="user-tag">{{ user }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- 總計區塊 -->
+                <div class="card mt-4 border-success">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="fas fa-calculator me-2"></i>總計</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h5 class="text-muted">總訂購數量</h5>
+                                    <div class="stat-number text-primary">
+                                        {{ stats|map(attribute='total_quantity')|sum }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h5 class="text-muted">總訂購人次</h5>
+                                    <div class="stat-number text-info">
+                                        {{ stats|map(attribute='user_count')|sum }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h5 class="text-muted">總金額</h5>
+                                    <div class="stat-number text-success">
+                                        ${{ "%.0f"|format(food_amounts|sum) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 圓餅圖容器 -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h4 class="card-title mb-0">
+                                    <i class="fas fa-chart-pie me-2"></i>餐點金額占比
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="foodPriceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 為所有數字加入動畫效果
+    document.querySelectorAll('.stat-number').forEach(function(element) {
+        const finalValue = parseInt(element.textContent);
+        if (!isNaN(finalValue)) {
+            animateNumber(element, 0, finalValue);
+        }
+    });
+
+    const ctx = document.getElementById('foodPriceChart').getContext('2d');
+    const data = {
+        labels: {{ food_names | tojson | safe }},
+        datasets: [{
+            data: {{ food_amounts | tojson | safe }},
+            backgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#4BC0C0',
+                '#9966FF',
+                '#FF9F40',
+                '#8AC24A',
+                '#EA80FC'
+            ]
+        }]
+    };
+    
+    new Chart(ctx, {
+        type: 'pie',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

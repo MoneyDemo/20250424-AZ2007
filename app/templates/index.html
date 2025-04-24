@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}首頁{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center fade-in">
+    <div class="col-md-8">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0">
+                    <i class="fas fa-clipboard-list me-2"></i>建立下午茶訂餐表單
+                </h2>
+            </div>
+            <div class="card-body">
+                <form id="create-form" method="POST" action="{{ url_for('main.create_form') }}" class="needs-validation" novalidate>
+                    <div class="mb-4">
+                        <label for="title" class="form-label">表單標題</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-heading"></i>
+                            </span>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="title" 
+                                   name="title" 
+                                   placeholder="例如：4/24 下午茶訂餐"
+                                   required>
+                        </div>
+                        <div class="invalid-feedback">
+                            請輸入表單標題
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="form-label">說明</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-info-circle"></i>
+                            </span>
+                            <textarea class="form-control" 
+                                      id="description" 
+                                      name="description" 
+                                      rows="3"
+                                      placeholder="請輸入訂餐說明（選填）"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">可訂購的餐點</label>
+                        <div id="food-list" class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card h-100 border-primary">
+                                    <div class="card-body">
+                                        <div class="food-item">
+                                            <div class="input-group mb-2">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-utensils"></i>
+                                                </span>
+                                                <input type="text" 
+                                                       class="form-control" 
+                                                       name="foods[0][name]" 
+                                                       placeholder="餐點名稱"
+                                                       required>
+                                            </div>
+                                            <div class="input-group mb-2">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-dollar-sign"></i>
+                                                </span>
+                                                <input type="number" 
+                                                       class="form-control" 
+                                                       name="foods[0][price]" 
+                                                       placeholder="價格"
+                                                       required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <button type="button" 
+                                id="add-food" 
+                                class="btn btn-outline-primary">
+                            <i class="fas fa-plus me-2"></i>新增餐點
+                        </button>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>建立訂餐表單
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const foodList = document.getElementById('food-list');
+    const addFoodBtn = document.getElementById('add-food');
+    let foodCount = 1;
+
+    // 新增餐點欄位
+    addFoodBtn.addEventListener('click', function() {
+        const col = document.createElement('div');
+        col.className = 'col-md-6 fade-in';
+        col.innerHTML = `
+            <div class="card h-100 border-primary">
+                <div class="card-body">
+                    <div class="food-item">
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">
+                                <i class="fas fa-utensils"></i>
+                            </span>
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="foods[${foodCount}][name]" 
+                                   placeholder="餐點名稱"
+                                   required>
+                        </div>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">
+                                <i class="fas fa-dollar-sign"></i>
+                            </span>
+                            <input type="number" 
+                                   class="form-control" 
+                                   name="foods[${foodCount}][price]" 
+                                   placeholder="價格"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        foodList.appendChild(col);
+        foodCount++;
+    });
+
+    // 表單驗證
+    const form = document.getElementById('create-form');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+});
+</script>
+{% endblock %}

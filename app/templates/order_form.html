@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}訂餐表單{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mb-4">
+    <div class="col-md-8">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0">
+                    <i class="fas fa-utensils me-2"></i>{{ form.title }}
+                </h2>
+            </div>
+            <div class="card-body">
+                {% if form.description %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>{{ form.description }}
+                </div>
+                {% endif %}
+
+                <div class="row g-4" id="food-list">
+                    {% for food in foods %}
+                    <div class="col-md-6">
+                        <div class="card h-100 food-card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ food.name }}</h5>
+                                <p class="card-text text-primary">
+                                    <i class="fas fa-dollar-sign me-1"></i>{{ "%.0f"|format(food.price) }}
+                                </p>
+                                <button class="btn btn-primary add-order-btn w-100"
+                                        data-food-id="{{ food.id }}"
+                                        data-form-id="{{ form.id }}">
+                                    <i class="fas fa-plus me-2"></i>加入訂單
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header bg-success text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>即時統計
+                </h3>
+            </div>
+            <div class="card-body">
+                <div id="statistics-container" data-form-id="{{ form.id }}">
+                    {% for stat in statistics %}
+                    <div class="mb-4">
+                        <h4>{{ stat.food.name }}</h4>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>訂購數量：</span>
+                            <span class="stat-number">{{ stat.total_quantity }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>訂購人數：</span>
+                            <span class="stat-number">{{ stat.user_count }}</span>
+                        </div>
+                        <div>
+                            <span>訂購者：</span>
+                            <div class="mt-2">
+                                {% for user in stat.users %}
+                                <span class="user-tag">{{ user }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('main.export_statistics', form_id=form.id) }}" 
+                       class="btn btn-success">
+                        <i class="fas fa-file-csv me-2"></i>匯出統計報表
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

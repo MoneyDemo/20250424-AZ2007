@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.eatenv/
+
+# 測試相關
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+
+# 文件相關
+docs/_build/
+.pdoc/
+_docs/
+
+# Flask
+instance/
+.webassets-cache
+
+# 開發工具
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.python-version
+poetry.lock
+
+# 專案特定
+instance/afternoon_tea.db
+instance/temp/
+*.csv
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 環境相關
+.env
+.venv
+venv/
+ENV/
+env/
+.env.local
+.env.*.local
+
+# 系統相關
+.DS_Store
+Thumbs.db
+desktop.ini
